@@ -3,6 +3,7 @@
 ## Como rodar o projeto
 1. Clone o projeto `git clone git@github.com:rafael-ogsantos/eulabs-api.git`
 2. Entre na pasta do projeto `cd eulabs-api`
+3. Copie o arquivo `.env.example` para `.env` e configure as variáveis de ambiente ```cp .env.example .env```
 3. Execute o comando `docker-compose up -d` para subir os containers e faça requisições para a API em `http://localhost:8080/api/products`
 
 ## Como rodar os testes
