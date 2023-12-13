@@ -55,7 +55,7 @@ func main() {
 	productRepository := repositories.NewProductRepositoryDb(c)
 	productService := services.NewProductService(productRepository)
 
-	r := router.NewRouter(c, e, productService, productRepository)
+	r := router.NewRouter(e, productService, productRepository)
 
 	if err := r.Router().Start(":8080"); err != http.ErrServerClosed {
 		log.Fatal(err)

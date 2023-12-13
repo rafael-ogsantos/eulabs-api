@@ -7,7 +7,6 @@ import (
 	"github.com/rafael-ogsantos/eulabs-api/application/repositories"
 	"github.com/rafael-ogsantos/eulabs-api/application/services"
 	"github.com/rafael-ogsantos/eulabs-api/domain"
-	"gorm.io/gorm"
 )
 
 type RouterInterface interface {
@@ -15,14 +14,12 @@ type RouterInterface interface {
 }
 
 type Router struct {
-	Conn              *gorm.DB
 	e                 *echo.Echo
 	ProductService    services.ProductServiceInterface
 	ProductRepository repositories.ProductRepository
 }
 
 func NewRouter(
-	Conn *gorm.DB,
 	e *echo.Echo,
 	service services.ProductServiceInterface,
 	repository repositories.ProductRepository,
@@ -35,6 +32,10 @@ func NewRouter(
 
 // New returns a new echo instance
 func (r *Router) Router() *echo.Echo {
+	if r.e == nil {
+		r.e = echo.New()
+	}
+
 	g := r.e.Group("/api")
 
 	// FindById
@@ -42,10 +43,7 @@ func (r *Router) Router() *echo.Echo {
 		id := c.Param("id")
 		ctx := c.Request().Context()
 
-		productRepository := repositories.NewProductRepositoryDb(r.Conn)
-		productService := services.NewProductService(productRepository)
-
-		product, err := productService.FindById(ctx, id)
+		product, err := r.ProductService.FindById(ctx, id)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -56,25 +54,18 @@ func (r *Router) Router() *echo.Echo {
 	// Create
 	g.POST("/product", func(c echo.Context) (err error) {
 		p := new(domain.Product)
+		ctx := c.Request().Context()
+
 		if err = c.Bind(p); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		productRepository := repositories.NewProductRepositoryDb(r.Conn)
-		productService := services.NewProductService(productRepository)
-
-		product := &domain.Product{
-			Name:        p.Name,
-			Description: p.Description,
-		}
-
-		productCreated, err := productService.Insert(c.Request().Context(), product)
-
+		product, err := r.ProductService.Insert(ctx, p)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, productCreated)
+		return c.JSON(http.StatusOK, product)
 	})
 
 	// Update
@@ -87,31 +78,25 @@ func (r *Router) Router() *echo.Echo {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		productRepository := repositories.NewProductRepositoryDb(r.Conn)
-		productService := services.NewProductService(productRepository)
-
-		productUpdated, err := productService.Update(ctx, id, p)
-
+		product, err := r.ProductService.Update(ctx, id, p)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, productUpdated)
+		return c.JSON(http.StatusOK, product)
 	})
 
 	// Delete
 	g.DELETE("/product/:id", func(c echo.Context) error {
 		id := c.Param("id")
 		ctx := c.Request().Context()
-		productRepository := repositories.NewProductRepositoryDb(r.Conn)
-		productService := services.NewProductService(productRepository)
 
-		err := productService.Delete(ctx, id)
+		err := r.ProductService.Delete(ctx, id)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, "Product deleted")
+		return c.NoContent(http.StatusNoContent)
 	})
 
 	return r.e
