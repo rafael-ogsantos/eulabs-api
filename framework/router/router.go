@@ -66,19 +66,24 @@ func New(conn *gorm.DB) *echo.Echo {
 		productRepository := repositories.NewProductRepositoryDb(conn)
 		productService := services.NewProductService(productRepository)
 
-		_, err := productService.FindById(ctx, id)
+		existingProduct, err := productService.FindById(ctx, id)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		product := &domain.Product{
-			ID:          id,
-			Name:        p.Name,
-			Description: p.Description,
-			CreatedAt:   p.CreatedAt,
+		if p.Name != "" {
+			existingProduct.Name = p.Name
 		}
 
-		productUpdated, err := productService.Update(c.Request().Context(), product)
+		if p.Description != "" {
+			existingProduct.Description = p.Description
+		}
+
+		if !p.CreatedAt.IsZero() {
+			existingProduct.CreatedAt = p.CreatedAt
+		}
+
+		productUpdated, err := productService.Update(c.Request().Context(), existingProduct)
 
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -87,6 +92,7 @@ func New(conn *gorm.DB) *echo.Echo {
 		return c.JSON(http.StatusOK, productUpdated)
 	})
 
+	// Delete
 	e.DELETE("/product/:id", func(c echo.Context) error {
 		id := c.Param("id")
 		ctx := c.Request().Context()
