@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 
@@ -45,5 +46,7 @@ func main() {
 	}
 
 	e := router.New(c)
-	e.Start(":8080")
+	if err := e.Start(":8080"); err != http.ErrServerClosed {
+		log.Fatal(err)
+	}
 }

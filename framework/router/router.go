@@ -13,8 +13,10 @@ import (
 func New(conn *gorm.DB) *echo.Echo {
 	e := echo.New()
 
+	g := e.Group("/api")
+
 	// FindById
-	e.GET("/product/:id", func(c echo.Context) error {
+	g.GET("/product/:id", func(c echo.Context) error {
 		id := c.Param("id")
 		ctx := c.Request().Context()
 
@@ -30,7 +32,7 @@ func New(conn *gorm.DB) *echo.Echo {
 	})
 
 	// Create
-	e.POST("/product", func(c echo.Context) (err error) {
+	g.POST("/product", func(c echo.Context) (err error) {
 		p := new(domain.Product)
 		if err = c.Bind(p); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -54,7 +56,7 @@ func New(conn *gorm.DB) *echo.Echo {
 	})
 
 	// Update
-	e.PUT("/product/:id", func(c echo.Context) error {
+	g.PUT("/product/:id", func(c echo.Context) error {
 		p := new(domain.Product)
 		id := c.Param("id")
 		ctx := c.Request().Context()
@@ -93,7 +95,7 @@ func New(conn *gorm.DB) *echo.Echo {
 	})
 
 	// Delete
-	e.DELETE("/product/:id", func(c echo.Context) error {
+	g.DELETE("/product/:id", func(c echo.Context) error {
 		id := c.Param("id")
 		ctx := c.Request().Context()
 		productRepository := repositories.NewProductRepositoryDb(conn)
