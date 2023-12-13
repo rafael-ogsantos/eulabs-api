@@ -67,24 +67,7 @@ func New(conn *gorm.DB, e *echo.Echo) *echo.Echo {
 		productRepository := repositories.NewProductRepositoryDb(conn)
 		productService := services.NewProductService(productRepository)
 
-		existingProduct, err := productService.FindById(ctx, id)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		if p.Name != "" {
-			existingProduct.Name = p.Name
-		}
-
-		if p.Description != "" {
-			existingProduct.Description = p.Description
-		}
-
-		if !p.CreatedAt.IsZero() {
-			existingProduct.CreatedAt = p.CreatedAt
-		}
-
-		productUpdated, err := productService.Update(c.Request().Context(), existingProduct)
+		productUpdated, err := productService.Update(ctx, id, p)
 
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

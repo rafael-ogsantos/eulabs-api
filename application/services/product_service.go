@@ -48,7 +48,24 @@ func (service ProductService) Insert(ctx context.Context, product *domain.Produc
 }
 
 // Update updates a product
-func (service ProductService) Update(ctx context.Context, product *domain.Product) (*domain.Product, error) {
+func (service ProductService) Update(ctx context.Context, id string, product *domain.Product) (*domain.Product, error) {
+	existingProduct, err := service.FindById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if product.Name != "" {
+		existingProduct.Name = product.Name
+	}
+
+	if product.Description != "" {
+		existingProduct.Description = product.Description
+	}
+
+	if !product.CreatedAt.IsZero() {
+		existingProduct.CreatedAt = product.CreatedAt
+	}
+
 	updatedProduct, err := service.ProductRepository.Update(ctx, product)
 
 	if err != nil {
