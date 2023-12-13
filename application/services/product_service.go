@@ -66,7 +66,7 @@ func (service ProductService) Update(ctx context.Context, id string, product *do
 		existingProduct.CreatedAt = product.CreatedAt
 	}
 
-	updatedProduct, err := service.ProductRepository.Update(ctx, product)
+	updatedProduct, err := service.ProductRepository.Update(ctx, existingProduct)
 
 	if err != nil {
 		return nil, err
