@@ -10,9 +10,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func New(conn *gorm.DB) *echo.Echo {
-	e := echo.New()
-
+// New returns a new echo instance
+func New(conn *gorm.DB, e *echo.Echo) *echo.Echo {
 	g := e.Group("/api")
 
 	// FindById

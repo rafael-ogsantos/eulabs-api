@@ -7,12 +7,15 @@ import (
 	"strconv"
 
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo/v4"
 	"github.com/rafael-ogsantos/eulabs-api/framework/database"
 	"github.com/rafael-ogsantos/eulabs-api/framework/router"
 )
 
+// Database instance
 var db database.Database
 
+// Load environment variables
 func init() {
 	err := godotenv.Load()
 	if err != nil {
@@ -38,15 +41,17 @@ func init() {
 	db.Env = os.Getenv("ENV")
 }
 
+// Main function
 func main() {
 	c, err := db.Connect()
+	e := echo.New()
 
 	if err != nil {
 		log.Fatalf("Error connecting to database: %v", err)
 	}
 
-	e := router.New(c)
-	if err := e.Start(":8080"); err != http.ErrServerClosed {
+	r := router.New(c, e)
+	if err := r.Start(":8080"); err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 }
