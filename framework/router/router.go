@@ -10,16 +10,39 @@ import (
 	"gorm.io/gorm"
 )
 
+type RouterInterface interface {
+	Router() *echo.Echo
+}
+
+type Router struct {
+	Conn              *gorm.DB
+	e                 *echo.Echo
+	ProductService    services.ProductServiceInterface
+	ProductRepository repositories.ProductRepository
+}
+
+func NewRouter(
+	Conn *gorm.DB,
+	e *echo.Echo,
+	service services.ProductServiceInterface,
+	repository repositories.ProductRepository,
+) RouterInterface {
+	return &Router{
+		ProductService:    service,
+		ProductRepository: repository,
+	}
+}
+
 // New returns a new echo instance
-func New(conn *gorm.DB, e *echo.Echo) *echo.Echo {
-	g := e.Group("/api")
+func (r *Router) Router() *echo.Echo {
+	g := r.e.Group("/api")
 
 	// FindById
 	g.GET("/product/:id", func(c echo.Context) error {
 		id := c.Param("id")
 		ctx := c.Request().Context()
 
-		productRepository := repositories.NewProductRepositoryDb(conn)
+		productRepository := repositories.NewProductRepositoryDb(r.Conn)
 		productService := services.NewProductService(productRepository)
 
 		product, err := productService.FindById(ctx, id)
@@ -37,7 +60,7 @@ func New(conn *gorm.DB, e *echo.Echo) *echo.Echo {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		productRepository := repositories.NewProductRepositoryDb(conn)
+		productRepository := repositories.NewProductRepositoryDb(r.Conn)
 		productService := services.NewProductService(productRepository)
 
 		product := &domain.Product{
@@ -64,7 +87,7 @@ func New(conn *gorm.DB, e *echo.Echo) *echo.Echo {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		productRepository := repositories.NewProductRepositoryDb(conn)
+		productRepository := repositories.NewProductRepositoryDb(r.Conn)
 		productService := services.NewProductService(productRepository)
 
 		productUpdated, err := productService.Update(ctx, id, p)
@@ -80,7 +103,7 @@ func New(conn *gorm.DB, e *echo.Echo) *echo.Echo {
 	g.DELETE("/product/:id", func(c echo.Context) error {
 		id := c.Param("id")
 		ctx := c.Request().Context()
-		productRepository := repositories.NewProductRepositoryDb(conn)
+		productRepository := repositories.NewProductRepositoryDb(r.Conn)
 		productService := services.NewProductService(productRepository)
 
 		err := productService.Delete(ctx, id)
@@ -91,5 +114,5 @@ func New(conn *gorm.DB, e *echo.Echo) *echo.Echo {
 		return c.JSON(http.StatusOK, "Product deleted")
 	})
 
-	return e
+	return r.e
 }

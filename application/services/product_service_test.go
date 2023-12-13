@@ -69,7 +69,7 @@ func TestProductServiceUpdate(t *testing.T) {
 	require.Nil(t, err)
 
 	product.Name = "Product 2"
-	result, err := service.Update(context.Background(), product)
+	result, err := service.Update(context.Background(), product.ID, product)
 
 	require.Nil(t, err)
 	require.Equal(t, result.Name, product.Name)

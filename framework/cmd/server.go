@@ -8,6 +8,8 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"github.com/rafael-ogsantos/eulabs-api/application/repositories"
+	"github.com/rafael-ogsantos/eulabs-api/application/services"
 	"github.com/rafael-ogsantos/eulabs-api/framework/database"
 	"github.com/rafael-ogsantos/eulabs-api/framework/router"
 )
@@ -50,8 +52,12 @@ func main() {
 		log.Fatalf("Error connecting to database: %v", err)
 	}
 
-	r := router.New(c, e)
-	if err := r.Start(":8080"); err != http.ErrServerClosed {
+	productRepository := repositories.NewProductRepositoryDb(c)
+	productService := services.NewProductService(productRepository)
+
+	r := router.NewRouter(c, e, productService, productRepository)
+
+	if err := r.Router().Start(":8080"); err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 }

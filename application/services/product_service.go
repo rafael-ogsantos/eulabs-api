@@ -11,7 +11,7 @@ import (
 type ProductServiceInterface interface {
 	FindById(ctx context.Context, id string) (*domain.Product, error)
 	Insert(ctx context.Context, product *domain.Product) (*domain.Product, error)
-	Update(ctx context.Context, product *domain.Product) (*domain.Product, error)
+	Update(ctx context.Context, id string, product *domain.Product) (*domain.Product, error)
 	Delete(ctx context.Context, id string) error
 }
 
@@ -21,12 +21,12 @@ type ProductService struct {
 }
 
 // NewProductService creates a new product service
-func NewProductService(repository repositories.ProductRepository) *ProductService {
+func NewProductService(repository repositories.ProductRepository) ProductServiceInterface {
 	return &ProductService{ProductRepository: repository}
 }
 
 // FindById returns a product by id
-func (service ProductService) FindById(ctx context.Context, id string) (*domain.Product, error) {
+func (service *ProductService) FindById(ctx context.Context, id string) (*domain.Product, error) {
 	product, err := service.ProductRepository.FindById(ctx, id)
 
 	if err != nil {
@@ -37,7 +37,7 @@ func (service ProductService) FindById(ctx context.Context, id string) (*domain.
 }
 
 // Insert inserts a new product
-func (service ProductService) Insert(ctx context.Context, product *domain.Product) (*domain.Product, error) {
+func (service *ProductService) Insert(ctx context.Context, product *domain.Product) (*domain.Product, error) {
 	p, err := service.ProductRepository.Insert(ctx, product)
 
 	if err != nil {
