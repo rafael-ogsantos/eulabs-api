@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+// Database struct
 type Database struct {
 	Db            *gorm.DB
 	Dsn           string
@@ -22,10 +23,12 @@ type Database struct {
 	Env           string
 }
 
+// NewDatabase creates a new database instance
 func NewDatabase() *Database {
 	return &Database{}
 }
 
+// NewDatabaseTest creates a new database instance for tests
 func NewDatabaseTest() *gorm.DB {
 	dbInstance := NewDatabase()
 	dbInstance.Env = "test"
@@ -44,6 +47,7 @@ func NewDatabaseTest() *gorm.DB {
 	return db
 }
 
+// Connect to database
 func (d *Database) Connect() (*gorm.DB, error) {
 
 	var err error

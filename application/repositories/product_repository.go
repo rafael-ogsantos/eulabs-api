@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// ProductRepository interface
 type ProductRepository interface {
 	FindById(ctx context.Context, id string) (*domain.Product, error)
 	Insert(ctx context.Context, product *domain.Product) (*domain.Product, error)
@@ -16,14 +17,17 @@ type ProductRepository interface {
 	Delete(ctx context.Context, id string) error
 }
 
+// ProductRepositoryDb struct
 type ProductRepositoryDb struct {
 	Db *gorm.DB
 }
 
+// NewProductRepositoryDb creates a new product repository
 func NewProductRepositoryDb(db *gorm.DB) *ProductRepositoryDb {
 	return &ProductRepositoryDb{Db: db}
 }
 
+// FindById returns a product by id
 func (repo ProductRepositoryDb) Insert(ctx context.Context, product *domain.Product) (*domain.Product, error) {
 	if product.ID == "" {
 		product.ID = uuid.NewV4().String()
@@ -38,6 +42,7 @@ func (repo ProductRepositoryDb) Insert(ctx context.Context, product *domain.Prod
 	return product, nil
 }
 
+// FindById returns a product by id
 func (repo ProductRepositoryDb) FindById(ctx context.Context, id string) (*domain.Product, error) {
 	var product domain.Product
 
@@ -50,6 +55,7 @@ func (repo ProductRepositoryDb) FindById(ctx context.Context, id string) (*domai
 	return &product, nil
 }
 
+// Update updates a product
 func (repo ProductRepositoryDb) Update(ctx context.Context, product *domain.Product) (*domain.Product, error) {
 	err := repo.Db.WithContext(ctx).Save(product).Error
 
@@ -60,6 +66,7 @@ func (repo ProductRepositoryDb) Update(ctx context.Context, product *domain.Prod
 	return product, nil
 }
 
+// Delete deletes a product
 func (repo ProductRepositoryDb) Delete(ctx context.Context, id string) error {
 	err := repo.Db.WithContext(ctx).Delete(&domain.Product{}, "id = ?", id).Error
 
